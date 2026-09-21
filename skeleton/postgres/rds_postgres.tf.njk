@@ -1,0 +1,10 @@
+resource "aws_db_instance" "postgres" {
+  allocated_storage    = {{ values.storage }}
+  engine               = "postgres"
+  engine_version       = "16.1"
+  instance_class       = "db.t3.micro"
+  db_name              = "app_db"
+  username             = "db_admin"
+  password             = var.db_password
+  skip_final_snapshot  = true
+}

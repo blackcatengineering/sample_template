@@ -1,0 +1,9 @@
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: {{ values.component_id }}
+  description: Cloud database managed via Terraform.
+spec:
+  type: database
+  owner: platform-team
+  system: core-infrastructure
