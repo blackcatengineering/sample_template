@@ -41,7 +41,6 @@ spec:
       name: Publish to GitHub
       action: publish:github
       input:
-        allowedHosts: ['github.com']
         description: This is ${{ values.name }} bootstrapped via Backstage
         repoUrl: '://github.com{{ values.owner }}&repo=${{ values.name }}'
 
