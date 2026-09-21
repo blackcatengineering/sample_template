@@ -1,50 +1,58 @@
 apiVersion: scaffolder.backstage.io/v1beta3
-# https://backstage.io/docs/features/software-catalog/descriptor-format#kind-template
 kind: Template
 metadata:
-  name: generated-example-template
-  title: Scaffolder Example Template
-  description: An example template for the scaffolder
+  name: sample-starter-template
+  title: Standard Application Starter Template
+  description: A clean starter framework for scaffolding repositories.
+  tags:
+    - starter
+    - template
 spec:
-  owner: user:guest
+  owner: guest
   type: template
-  # These parameters are used to generate the input form in the frontend, and are
-  # used to gather input data for the execution of the template.
+
   parameters:
-    - title: Fill in some steps
+    - title: Component Details
       required:
         - name
+        - owner
       properties:
         name:
           title: Name
           type: string
-          description: Unique name of the component
+          description: Name of your new repository code.
         owner:
           title: Owner
           type: string
-          description: Owner of the component
-          ui:field: OwnerPicker
-          ui:options:
-            catalogFilter:
-              kind: Group
-    - title: Choose a location
-      required:
-        - repoUrl
-      properties:
-        repoUrl:
-          title: Repository Location
-          type: string
-          ui:field: RepoUrlPicker
-          ui:options:
-            allowedHosts:
-              - github.com
+          description: The team in charge.
+          default: platform-team
+
   steps:
     - id: fetch-base
-      name: Fetch Base
+      name: Fetch Base Skeleton
       action: fetch:template
       input:
         url: ./skeleton
         values:
-          name: ${{parameters.name}}
-          owner: ${{parameters.owner}}
-          destination: ${{ parameters.repoUrl | parseRepoUrl }}
+          name: ${{ values.name }}
+          owner: ${{ values.owner }}
+
+    - id: publish
+      name: Publish to GitHub
+      action: publish:github
+      input:
+        allowedHosts: ['github.com']
+        description: This is ${{ values.name }} bootstrapped via Backstage
+        repoUrl: '://github.com{{ values.owner }}&repo=${{ values.name }}'
+
+    - id: register
+      name: Register in Software Catalog
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Repository Link
+        url: ${{ steps['publish'].output.remoteUrl }}
