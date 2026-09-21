@@ -5,6 +5,6 @@ metadata:
   annotations:
     github.com/project-slug: blackcatengineering/sample_template
 spec:
-  type: other
+  type: template
   lifecycle: unknown
   owner: admin
