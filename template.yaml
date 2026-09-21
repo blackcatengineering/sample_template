@@ -42,7 +42,7 @@ spec:
       action: publish:github
       input:
         description: This is ${{ values.name }} bootstrapped via Backstage
-        repoUrl: '://github.com{{ values.owner }}&repo=${{ values.name }}'
+        repoUrl: '://github.com/{{ values.name }}&owner=${{ values.owner }}'
 
     - id: register
       name: Register in Software Catalog
