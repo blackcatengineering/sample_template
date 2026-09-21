@@ -1,0 +1,10 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: sample_template
+  annotations:
+    github.com/project-slug: blackcatengineering/sample_template
+spec:
+  type: other
+  lifecycle: unknown
+  owner: admin
