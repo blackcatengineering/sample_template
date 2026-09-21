@@ -8,7 +8,7 @@ metadata:
   description: An example template for the scaffolder
 spec:
   owner: user:guest
-  type: service
+  type: template
   # These parameters are used to generate the input form in the frontend, and are
   # used to gather input data for the execution of the template.
   parameters:
