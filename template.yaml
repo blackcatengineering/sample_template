@@ -26,6 +26,17 @@ spec:
           type: string
           description: The team in charge.
           default: platform-team
+    - title: Choose a location
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
 
   steps:
     - id: fetch-base
@@ -41,8 +52,8 @@ spec:
       name: Publish to GitHub
       action: publish:github
       input:
-        description: This is ${{ values.name }} bootstrapped via Backstage
-        repoUrl: '://github.com/{{ values.name }}&owner=${{ values.owner }}'
+        description: This is ${{parameters.name}} bootstrapped via Backstage
+        repoUrl: '://github.com/${{parameters.name}}&owner=${{parameters.owner}}'
 
     - id: register
       name: Register in Software Catalog
