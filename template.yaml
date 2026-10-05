@@ -1,14 +1,63 @@
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
-  name: dynamic-github-template
-  title: Dynamic GitHub Repository Template
-  description: A template showing how to use the RepoUrlPicker with a dynamic organization/owner dropdown.
+  name: dynamic-webapp-db-template
+  title: Dynamic Webapp with Database
+  description: Creates a web application with a dynamic GitHub publisher and a customizable database layer.
 spec:
-  owner: platform-team
+  owner: architecture-team
   type: service
 
+  # 1. FORM STEPS DEFINITION
   parameters:
+    - title: Webapp Configuration
+      required:
+        - language
+        - languageVersion
+        - framework
+        - frameworkVersion
+      properties:
+        language:
+          title: Language
+          type: string
+          enum:
+            - JavaScript
+            - TypeScript
+            - Java
+        languageVersion:
+          title: Language Version
+          type: string
+          enum:
+            - '18'
+            - '20'
+            - '17'
+            - '21'
+        framework:
+          title: Framework
+          type: string
+          enum:
+            - Express
+            - Spring Boot
+        frameworkVersion:
+          title: Framework Version
+          type: string
+          enum:
+            - '4.18'
+            - '3.2'
+
+    - title: Database Layer Configuration
+      required:
+        - database
+      properties:
+        database:
+          title: Select Database
+          type: string
+          default: PostgreSQL
+          enum:
+            - PostgreSQL
+            - MySQL
+          description: Choose your target database engine.
+
     - title: Repository Location
       required:
         - repoUrl
@@ -28,36 +77,39 @@ spec:
                   - repo
                   - read:org
 
+  # 2. BACKEND ACTIONS PIPELINE
   steps:
     - id: fetch-base
-      name: Fetch Base Template
+      name: Fetch Base Template Skeleton
       action: fetch:template
       input:
-        url: ./template
+        url: ./skeleton
         values:
-          repoName: ${{ parameters.repoUrl | parseRepoUrl | BillOfMaterials }} # placeholder evaluation
+          language: ${{ parameters.language }}
+          languageVersion: ${{ parameters.languageVersion }}
+          framework: ${{ parameters.framework }}
+          frameworkVersion: ${{ parameters.frameworkVersion }}
+          database: ${{ parameters.database }}
 
     - id: publish
       name: Publish to GitHub
       action: publish:github
       input:
-        allowedHosts:
-          - github.com
         repoUrl: ${{ parameters.repoUrl }}
-        # 👇 Uses the dynamic OAuth token captured from the picker to perform the action
-        token: ${{ secrets.USER_OAUTH_TOKEN }}
+        description: Generated via Backstage Software Templates.
 
     - id: register
-      name: Register Component
+      name: Register in Backstage Catalog
       action: catalog:register
       input:
         repoUrl: ${{ parameters.repoUrl }}
-        catalogInfoPath: '/catalog-info.yaml'
+        catalogInfoPath: /catalog-info.yaml
 
+  # 3. FINAL SUMMARY OUTPUTS
   output:
     links:
       - title: Repository
         url: ${{ steps['publish'].output.remoteUrl }}
-      - title: Open in Catalog
+      - title: Open in Backstage Catalog
         icon: catalog
         entityRef: ${{ steps['register'].output.entityRef }}
