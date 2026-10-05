@@ -15,7 +15,6 @@ spec:
     - title: Component Details
       required:
         - name
-        - owner
       properties:
         name:
           title: Name
