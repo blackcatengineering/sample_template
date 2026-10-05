@@ -54,6 +54,10 @@ spec:
           ui:options:
             allowedHosts:
               - github.com
+            allowedOwners:
+              - ${{value.repoOwner}}
+            allowedRepos:
+              - ${{value.name}}
 
   steps:
     - id: fetch-base
