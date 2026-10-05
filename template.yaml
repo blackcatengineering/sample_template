@@ -1,16 +1,21 @@
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
-  name: dynamic-webapp-db-template
-  title: Dynamic Webapp with Database
-  description: Creates a web application with conditional validation, database layer, and a dynamic repo picker.
+  name: sample-starter-template
+  title: Standard Application Starter Template
+  description: A clean starter framework for scaffolding repositories.
+  tags:
+    - starter
+    - template
 spec:
-  owner: architecture-team
-  type: service
+  owner: guest
+  type: template
 
-  # 1. FORM UI DEFINITION
   parameters:
-    - title: Define Stack Specifications
+    # ----------------------------------------------------
+    # STAGE 1: DYNAMIC SCHEMA AND CONDITIONAL INGESTION
+    # ----------------------------------------------------
+    - title: Step 1 - Define Stack Specifications
       required:
         - language
       properties:
@@ -20,11 +25,10 @@ spec:
           enum: 
             - 'Node.js-Express'
             - 'Java-SpringBoot'
-      # 💡 Consolidating dynamic schema choices here prevents multi-page validation faults
       dependencies:
         language:
           oneOf:
-            # 🟢 Configurations revealed when 'Java-SpringBoot' is chosen
+            # 🟢 JAVA ACTIVE CONDITIONAL BLOCK
             - properties:
                 language:
                   enum: ['Java-SpringBoot']
@@ -36,14 +40,14 @@ spec:
                   title: Java JDK Version
                   type: string
                   enum: ['17', '21']
-                  default: '21'
+                  default: '21' # 💡 Default is only active if Java is selected
                 springVersion:
                   title: Spring Boot Version
                   type: string
                   enum: ['3.3', '3.4']
-                  default: '3.4'
+                  default: '3.4' # 💡 Default is only active if Java is selected
             
-            # 🔵 Configurations revealed when 'Node.js-Express' is chosen
+            # 🔵 NODE ACTIVE CONDITIONAL BLOCK
             - properties:
                 language:
                   enum: ['Node.js-Express']
@@ -55,41 +59,44 @@ spec:
                   title: Node.js Runtime Version
                   type: string
                   enum: ['18', '20', '22']
-                  default: '22'
+                  default: '22' # 💡 Default is only active if Node is selected
                 expressVersion:
                   title: Express Version
                   type: string
                   enum: ['4.21', '5.0']
-                  default: '4.21'
+                  default: '4.21' # 💡 Default is only active if Node is selected
 
-    - title: Database Layer Configuration
+    # ----------------------------------------------------
+    # STAGE 2: INFRASTRUCTURE & TARGET METADATA
+    # ----------------------------------------------------
+    - title: Step 2 - Deployment Target Destination
       required:
+        - name
+        - owner
+        - namespace
         - database
       properties:
+        name:
+          title: Application Name
+          type: string
+        owner:
+          title: Owner Group
+          type: string
+          default: engineering-team
+        namespace:
+          title: Kubernetes Namespace
+          type: string
+          default: default
         database:
-          title: Select Database
+          title: Backend Database Engine
           type: string
-          default: PostgreSQL
-          enum:
-            - PostgreSQL
-            - MySQL
+          enum: ['PostgreSQL', 'MySQL']
+          default: 'PostgreSQL'
 
-    - title: Choose Repository Location
-      required:
-        - repoUrl
-      properties:
-        repoUrl:
-          title: Repository Destination
-          type: string
-          ui:field: RepoUrlPicker
-          ui:options:
-            allowedHosts:
-              - github.com
-
+  # ----------------------------------------------------
   # 2. ACTIONS PIPELINE
+  # ----------------------------------------------------
   steps:
-
-    # STEP A: Always fetch the shared/common platform manifests
     - id: fetch-common
       name: Fetch Common Baseline Manifests
       action: fetch:template
@@ -97,60 +104,54 @@ spec:
         url: ./skeleton/common
         targetPath: .
         values:
-          name: ${{ values.name }}
-          owner: ${{ values.owner }}
-          namespace: ${{ values.namespace }}
-          database: ${{ values.database }}
+          name: "${{ values.name }}"
+          owner: "${{ values.owner }}"
+          namespace: "${{ values.namespace }}"
+          database: "${{ values.database }}"
 
-    # STEP B: Only fetch and parse Java files if Java was chosen
     - id: fetch-java
       name: Fetch Java Spring Boot Skeleton
-      if: ${{ values.language == 'Java-SpringBoot' }}
+      if: "${{ values.language == 'Java-SpringBoot' }}"
       action: fetch:template
       input:
         url: ./skeleton/java
         targetPath: .
         values:
-          name: ${{ values.name }}
-          language: ${{ values.language }}
-          languageVersion: ${{ values.javaVersion }}
-          frameworkVersion: ${{ values.springVersion }}
-          database: ${{ values.database }}
+          name: "${{ values.name }}"
+          language: "${{ values.language }}"
+          languageVersion: "${{ values.javaVersion }}"
+          frameworkVersion: "${{ values.springVersion }}"
+          database: "${{ values.database }}"
 
-    # STEP C: Only fetch and parse Node files if JS/TS was chosen
     - id: fetch-node
       name: Fetch Node.js Express Skeleton
-      if: ${{ values.language == 'Node.js-Express' }}
+      if: "${{ values.language == 'Node.js-Express' }}"
       action: fetch:template
       input:
         url: ./skeleton/node
         targetPath: .
         values:
-          name: ${{ values.name }}
-          language: ${{ values.language }}
-          languageVersion: ${{ values.nodeVersion }}
-          frameworkVersion: ${{ values.expressVersion }}
-          database: ${{ values.database }}
+          name: "${{ values.name }}"
+          language: "${{ values.language }}"
+          languageVersion: "${{ values.nodeVersion }}"
+          frameworkVersion: "${{ values.expressVersion }}"
+          database: "${{ values.database }}"
 
     - id: publish
-      name: Publish to GitHub
+      name: Publish to Git Repository
       action: publish:github
       input:
-        repoUrl: ${{ parameters.repoUrl if parameters.repoUrl.repoUrl is not defined else parameters.repoUrl.repoUrl }}
-        description: Generated via Backstage Software Templates.
+        description: "This is ${{ values.name }} bootstrapped via Backstage"
+        repoUrl: "://github.com{{ values.name }}&owner=${{ values.owner }}"
 
     - id: register
-      name: Register in Backstage Catalog
+      name: Register in Software Catalog
       action: catalog:register
       input:
-        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
-        catalogInfoPath: /catalog-info.yaml
+        repoContentsUrl: "${{ steps['publish'].output.repoContentsUrl }}"
+        catalogInfoPath: '/catalog-info.yaml'
 
-  # 3. INTERFACE LINKS
   output:
     links:
-      - title: Repository
-        url: ${{ steps['publish'].output.remoteUrl }}
-      - title: Open in Backstage Catalog
-        icon: catalog
-        entityRef: ${{ steps['register'].output.entityRef }}
+      - title: Repository Link
+        url: "${{ steps['publish'].output.remoteUrl }}"
