@@ -121,10 +121,14 @@ spec:
       input:
         url: ./skeleton
         values:
-          # 👇 Update these paths to match the new nested object structure
+          # 👇 Bridge the new multi-step nested object variables to the skeleton
           language: ${{ parameters.projectMeta.language }}
           framework: ${{ parameters.projectMeta.framework }}
+          
+          # Force both languageVersion and frameworkVersion to parse the same parameter safely
+          languageVersion: ${{ parameters.projectMeta.version }}
           frameworkVersion: ${{ parameters.projectMeta.version }}
+          
           database: ${{ parameters.database }}
 
     - id: publish
@@ -134,12 +138,13 @@ spec:
         # repoUrl: ${{ parameters.repoUrl.repoUrl }}
         description: Generated via Backstage Software Templates.
         repoUrl: ${{ parameters.repoUrl if parameters.repoUrl.repoUrl is not defined else parameters.repoUrl.repoUrl }}
-        
+
     - id: register
       name: Register in Backstage Catalog
       action: catalog:register
       input:
-        repoUrl: ${{ parameters.repoUrl }}
+        # 👇 Update this line to use the exact same fallback evaluation
+        repoUrl: ${{ parameters.repoUrl if parameters.repoUrl.repoUrl is not defined else parameters.repoUrl.repoUrl }}
         catalogInfoPath: /catalog-info.yaml
 
   # 3. FINAL SUMMARY OUTPUTS
