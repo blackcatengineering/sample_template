@@ -88,6 +88,25 @@ spec:
           enum: ['PostgreSQL', 'MySQL']
           default: 'PostgreSQL'
 
+    - title: Repository Location
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Repository Destination
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+            # 👇 Triggers the frontend to fetch the user's GitHub identities dynamically
+            requestUserCredentials:
+              secretsKey: USER_OAUTH_TOKEN
+              additionalScopes:
+                github:
+                  - repo
+                  - read:org
+
   # ----------------------------------------------------
   # 2. ACTIONS PIPELINE
   # ----------------------------------------------------
@@ -133,11 +152,12 @@ spec:
           database: "${{ values.database }}"
 
     - id: publish
-      name: Publish to Git Repository
+      name: Publish to GitHub
       action: publish:github
       input:
-        description: "This is ${{ values.name }} bootstrapped via Backstage"
-        repoUrl: "://github.com{{ values.name }}&owner=${{ values.owner }}"
+        repoUrl: ${{ parameters.repoUrl }}
+        description: Generated via Backstage Software Templates.
+
 
     - id: register
       name: Register in Software Catalog
