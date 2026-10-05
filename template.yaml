@@ -67,8 +67,8 @@ spec:
           type: string
           ui:field: RepoUrlPicker
           ui:options:
-            allowedHosts:
-              - github.com
+            # allowedHosts:
+            #   - github.com
             # 👇 Triggers the frontend to fetch the user's GitHub identities dynamically
             requestUserCredentials:
               secretsKey: USER_OAUTH_TOKEN
