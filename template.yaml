@@ -67,8 +67,6 @@ spec:
           type: string
           ui:field: RepoUrlPicker
           ui:options:
-            allowedHosts:
-              - github.com
             # Enables dynamic fetching of user's GitHub orgs/namespaces
             requestUserCredentials:
               secretsKey: USER_OAUTH_TOKEN
