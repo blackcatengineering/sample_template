@@ -20,7 +20,8 @@ spec:
         language:
           title: Primary Language
           type: string
-          enum: [JavaScript, TypeScript, Java]
+          enum: [Node.js-Express, Java-SpringBoot]
+
 
     # ----------------------------------------------------
     # STAGE 2: JAVA EXCLUSIVE SPECS
@@ -31,7 +32,7 @@ spec:
           oneOf:
             - properties:
                 language:
-                  enum: [Java]
+                  enum: [Java-SpringBoot]
       required:
         - javaVersion
         - springVersion
@@ -56,7 +57,7 @@ spec:
           oneOf:
             - properties:
                 language:
-                  enum: [JavaScript, TypeScript]
+                  enum: [Node.js-Express]
       required:
         - nodeVersion
         - expressVersion
@@ -123,8 +124,8 @@ spec:
         values:
           name: ${{ values.name }}
           language: ${{ values.language }}
-          languageVersion: ${{ values.languageVersion }}
-          frameworkVersion: ${{ values.frameworkVersion }}
+          languageVersion: ${{ values.javaVersion }}
+          frameworkVersion: ${{ values.springVersion }}
           database: ${{ values.database }}
 
     # STEP C: Only fetch and parse Node files if JS/TS was chosen
@@ -138,8 +139,8 @@ spec:
         values:
           name: ${{ values.name }}
           language: ${{ values.language }}
-          languageVersion: ${{ values.languageVersion }}
-          frameworkVersion: ${{ values.frameworkVersion }}
+          languageVersion: ${{ values.nodeVersion }}
+          frameworkVersion: ${{ values.expressVersion }}
           database: ${{ values.database }}
 
     - id: publish
