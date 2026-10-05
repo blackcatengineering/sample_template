@@ -131,9 +131,10 @@ spec:
       name: Publish to GitHub
       action: publish:github
       input:
-        repoUrl: ${{ parameters.repoUrl.repoUrl }}
+        # repoUrl: ${{ parameters.repoUrl.repoUrl }}
         description: Generated via Backstage Software Templates.
-
+        repoUrl: ${{ parameters.repoUrl if parameters.repoUrl.repoUrl is not defined else parameters.repoUrl.repoUrl }}
+        
     - id: register
       name: Register in Backstage Catalog
       action: catalog:register
