@@ -15,12 +15,21 @@ spec:
     - title: Component Details
       required:
         - name
+        - owner
       properties:
         name:
           title: Name
           type: string
           description: Name of your new repository code.
-    - title: Choose an owner
+        owner:
+          title: Owner
+          type: string
+          description: Owner of the component
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: [Group, User]
+    - title: Choose a Repository Owner
       required:
         - repoOwner
       properties:
@@ -34,7 +43,7 @@ spec:
               - backstage
             requestUserCredentials:
               secretsKey: USER_OAUTH_TOKEN
-    - title: Choose a location
+    - title: Choose a Repository Location
       required:
         - repoUrl
       properties:
@@ -53,8 +62,8 @@ spec:
       input:
         url: ./skeleton
         values:
-          name: ${{ values.name }}
-          owner: ${{ values.owner }}
+          name: ${{ parameters.name }}
+          owner: ${{ parameters.owner }}
 
     - id: publish
       name: Publish to GitHub
