@@ -116,7 +116,7 @@ spec:
     # STEP B: Only fetch and parse Java files if Java was chosen
     - id: fetch-java
       name: Fetch Java Spring Boot Skeleton
-      if: ${{ values.language == 'Java' }}
+      if: ${{ values.language == 'Java-SpringBoot' }}
       action: fetch:template
       input:
         url: ./skeleton/java
@@ -131,7 +131,7 @@ spec:
     # STEP C: Only fetch and parse Node files if JS/TS was chosen
     - id: fetch-node
       name: Fetch Node.js Express Skeleton
-      if: ${{ values.language == 'JavaScript' or values.language == 'TypeScript' }}
+      if: ${{ values.language == 'Node.js-Express' }}
       action: fetch:template
       input:
         url: ./skeleton/node
