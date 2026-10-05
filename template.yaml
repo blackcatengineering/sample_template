@@ -8,8 +8,8 @@ spec:
   owner: architecture-team
   type: service
 
-  # 1. FORM UI DEFINITION
- parameters:
+# 1. FORM UI DEFINITION
+parameters:
     # ----------------------------------------------------
     # STAGE 1: CORE SELECTION
     # ----------------------------------------------------
