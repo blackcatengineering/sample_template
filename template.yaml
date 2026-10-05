@@ -67,8 +67,8 @@ spec:
           type: string
           ui:field: RepoUrlPicker
           ui:options:
-            # allowedHosts:
-            #   - github.com
+            allowedHosts:
+              - github.com
             # 👇 Triggers the frontend to fetch the user's GitHub identities dynamically
             requestUserCredentials:
               secretsKey: USER_OAUTH_TOKEN
@@ -95,7 +95,7 @@ spec:
       name: Publish to GitHub
       action: publish:github
       input:
-        repoUrl: ${{ parameters.repoUrl }}
+        repoUrl: ${{ parameters.repoUrl.repoUrl }}
         description: Generated via Backstage Software Templates.
 
     - id: register
