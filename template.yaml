@@ -143,8 +143,9 @@ spec:
       name: Register in Backstage Catalog
       action: catalog:register
       input:
-        # 👇 Update this line to use the exact same fallback evaluation
-        repoUrl: ${{ parameters.repoUrl if parameters.repoUrl.repoUrl is not defined else parameters.repoUrl.repoUrl }}
+        # 👇 Change this from repoUrl to repoContentsUrl, 
+        # feeding in the automated output string from your publish step:
+        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
         catalogInfoPath: /catalog-info.yaml
 
   # 3. FINAL SUMMARY OUTPUTS
