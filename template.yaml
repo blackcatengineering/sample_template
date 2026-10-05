@@ -67,9 +67,10 @@ spec:
           type: string
           ui:field: RepoUrlPicker
           ui:options:
+            allowedHosts:
+              - github.com
             # Enables dynamic fetching of user's GitHub orgs/namespaces
             requestUserCredentials:
-              secretsKey: USER_OAUTH_TOKEN
               additionalScopes:
                 - repo
                 - read:org
@@ -93,7 +94,6 @@ spec:
       action: publish:github
       input:
         repoUrl: ${{ parameters.repoUrl }}
-        token: ${{ secrets.USER_OAUTH_TOKEN }}
         description: Generated via Backstage Software Templates.
 
     - id: register
