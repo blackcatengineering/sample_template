@@ -1,10 +1,10 @@
 {
   "name": "generated-webapp",
   "version": "1.0.0",
-  "description": "Scaffolder-generated application using {{ values.language }}",
+  "description": "Scaffolder-generated application using ${{ values.language }}",
   "main": "index.js",
   "engines": {
-    "node": ">= {{ values.languageVersion }}"
+    "node": ">= ${{ values.languageVersion }}"
   },
   "dependencies": {
     {% if values.framework == 'Express' %}
