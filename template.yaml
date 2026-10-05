@@ -107,10 +107,11 @@ spec:
                   - repo
                   - read:org
 
-  # ----------------------------------------------------
+# ----------------------------------------------------
   # 2. ACTIONS PIPELINE
   # ----------------------------------------------------
   steps:
+    # STEP A: Always pull the common base files
     - id: fetch-common
       name: Fetch Common Baseline Manifests
       action: fetch:template
@@ -123,9 +124,11 @@ spec:
           namespace: "${{ values.namespace }}"
           database: "${{ values.database }}"
 
+    # STEP B: Fetch Java only if selected AND variables are active
     - id: fetch-java
       name: Fetch Java Spring Boot Skeleton
-      if: values.language == 'Java-SpringBoot'
+      # 💡 Explicitly ensures Java was picked AND Java variables are present
+      if: values.language == 'Java-SpringBoot' && values.javaVersion != null
       action: fetch:template
       input:
         url: ./skeleton/java
@@ -137,9 +140,11 @@ spec:
           frameworkVersion: "${{ values.springVersion }}"
           database: "${{ values.database }}"
 
+    # STEP C: Fetch Node only if selected AND variables are active
     - id: fetch-node
       name: Fetch Node.js Express Skeleton
-      if: values.language == 'Node.js-Express'
+      # 💡 Explicitly ensures Node was picked AND Node variables are present
+      if: values.language == 'Node.js-Express' && values.nodeVersion != null
       action: fetch:template
       input:
         url: ./skeleton/node
