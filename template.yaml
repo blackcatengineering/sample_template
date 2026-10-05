@@ -1,78 +1,63 @@
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
-  name: github-publisher-example
-  title: Example GitHub Repository Publisher
-  description: An example Backstage Scaffolder template that uses RepoUrlPicker to publish a new repository to GitHub.
+  name: dynamic-github-template
+  title: Dynamic GitHub Repository Template
+  description: A template showing how to use the RepoUrlPicker with a dynamic organization/owner dropdown.
 spec:
-  owner: engineering-ops
+  owner: platform-team
   type: service
 
-  # 1. Define the user input parameters
   parameters:
     - title: Repository Location
+      required:
+        - repoUrl
       properties:
         repoUrl:
-          title: Repository Location
+          title: Repository Destination
           type: string
           ui:field: RepoUrlPicker
           ui:options:
-            # Enforce or allow specific providers (e.g., github.com)
             allowedHosts:
               - github.com
-            # Optional: restrict to specific organizations if desired
-            # allowedOwners:
-            #   - my-github-org
+            # 👇 Triggers the frontend to fetch the user's GitHub identities dynamically
+            requestUserCredentials:
+              secretsKey: USER_OAUTH_TOKEN
+              additionalScopes:
+                github:
+                  - repo
+                  - read:org
 
-    - title: Template Details
-      required:
-        - component_id
-        - description
-      properties:
-        component_id:
-          title: Name
-          type: string
-          description: Unique name for the component and GitHub repository.
-        description:
-          title: Description
-          type: string
-          description: A brief description of the component.
-
-  # 2. Define the sequential execution steps
   steps:
-    # Fetch a skeleton template from a specific directory or remote URL
     - id: fetch-base
-      name: Fetch Base Skeleton
+      name: Fetch Base Template
       action: fetch:template
       input:
-        url: ./skeleton # Assumes a local 'skeleton' directory exists next to this YAML
+        url: ./template
         values:
-          componentId: ${{ parameters.component_id }}
-          description: ${{ parameters.description }}
+          repoName: ${{ parameters.repoUrl | parseRepoUrl | BillOfMaterials }} # placeholder evaluation
 
-    # Publish the rendered skeleton directly to GitHub using the RepoUrlPicker selection
-    - id: publish-github
+    - id: publish
       name: Publish to GitHub
       action: publish:github
       input:
-        # Maps the complex RepoUrlPicker object directly to the URL string expected by the action
+        allowedHosts:
+          - github.com
         repoUrl: ${{ parameters.repoUrl }}
-        description: ${{ parameters.description }}
-        defaultBranch: main
+        # 👇 Uses the dynamic OAuth token captured from the picker to perform the action
+        token: ${{ secrets.USER_OAUTH_TOKEN }}
 
-    # Optional: Register the component directly into the Backstage Catalog
     - id: register
-      name: Register in Backstage Catalog
+      name: Register Component
       action: catalog:register
       input:
         repoUrl: ${{ parameters.repoUrl }}
-        catalogInfoPath: /catalog-info.yaml
+        catalogInfoPath: '/catalog-info.yaml'
 
-  # 3. Define the outputs shown to the user upon successful completion
   output:
     links:
-      - title: View Repository on GitHub
-        url: ${{ steps['publish-github'].output.remoteUrl }}
-      - title: Open in Backstage Catalog
+      - title: Repository
+        url: ${{ steps['publish'].output.remoteUrl }}
+      - title: Open in Catalog
         icon: catalog
         entityRef: ${{ steps['register'].output.entityRef }}
