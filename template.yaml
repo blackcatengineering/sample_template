@@ -1,7 +1,7 @@
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
-  name: sample-starter-template
+  name: sample-starter-template-v2
   title: Standard Application Starter Template
   description: A clean starter framework for scaffolding repositories.
   tags:
@@ -11,10 +11,10 @@ spec:
   owner: guest
   type: template
 
+  # ----------------------------------------------------
+  # 1. PARAMETERS WIZARD INTERFACE
+  # ----------------------------------------------------
   parameters:
-    # ----------------------------------------------------
-    # STAGE 1: DYNAMIC SCHEMA AND CONDITIONAL INGESTION
-    # ----------------------------------------------------
     - title: Step 1 - Define Stack Specifications
       required:
         - language
@@ -32,43 +32,38 @@ spec:
             - properties:
                 language:
                   enum: ['Java-SpringBoot']
-              required:
-                - javaVersion
-                - springVersion
-              properties:
                 javaVersion:
                   title: Java JDK Version
                   type: string
                   enum: ['17', '21']
-                  default: '21' # 💡 Default is only active if Java is selected
+                  default: '21'
                 springVersion:
                   title: Spring Boot Version
                   type: string
                   enum: ['3.3', '3.4']
-                  default: '3.4' # 💡 Default is only active if Java is selected
+                  default: '3.4'
+              required:
+                - javaVersion
+                - springVersion
             
             # 🔵 NODE ACTIVE CONDITIONAL BLOCK
             - properties:
                 language:
                   enum: ['Node.js-Express']
-              required:
-                - nodeVersion
-                - expressVersion
-              properties:
                 nodeVersion:
                   title: Node.js Runtime Version
                   type: string
                   enum: ['18', '20', '22']
-                  default: '22' # 💡 Default is only active if Node is selected
+                  default: '22'
                 expressVersion:
                   title: Express Version
                   type: string
                   enum: ['4.21', '5.0']
-                  default: '4.21' # 💡 Default is only active if Node is selected
+                  default: '4.21'
+              required:
+                - nodeVersion
+                - expressVersion
 
-    # ----------------------------------------------------
-    # STAGE 2: INFRASTRUCTURE & TARGET METADATA
-    # ----------------------------------------------------
     - title: Step 2 - Deployment Target Destination
       required:
         - name
