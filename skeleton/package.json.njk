@@ -8,11 +8,11 @@
   },
   "dependencies": {
     {% if values.framework == 'Express' %}
-    "express": "^{{ values.frameworkVersion }}",
+    "express": "^4.20.0",
     {% endif %}
     {% if values.database == 'PostgreSQL' %}
     "pg": "^8.11.0"
-    {% elif values.database == 'MySQL' %}
+    {% else %}
     "mysql2": "^3.6.0"
     {% endif %}
   },
