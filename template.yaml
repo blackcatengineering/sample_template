@@ -3,12 +3,12 @@ kind: Template
 metadata:
   name: dynamic-webapp-db-template
   title: Dynamic Webapp with Database
-  description: Creates a web application with a dynamic GitHub publisher and a customizable database layer.
+  description: Creates a web application with conditional validation, database layer, and a dynamic repo picker.
 spec:
   owner: architecture-team
   type: service
 
-  # 1. FORM STEPS DEFINITION
+  # 1. FORM UI DEFINITION
   parameters:
     - title: Webapp Configuration
       required:
@@ -36,12 +36,11 @@ spec:
                 - Express
                 - Spring Boot
             version:
-              title: Framework Version
+              title: Framework/Language Version
               type: string
 
-          # ⛓️ DEPENDENCY MATRIX (Enforces valid combinations)
+          # ENFORCE VALID COMBINATIONS
           allOf:
-            # --- Rule 1: If JavaScript is selected ---
             - if:
                 properties:
                   language:
@@ -51,10 +50,8 @@ spec:
                   framework:
                     enum: [Express]
                   version:
-                    enum: ['4.18', '4.20']
-                    default: '4.20'
-
-            # --- Rule 2: If TypeScript is selected ---
+                    enum: ['18', '20']
+                    default: '20'
             - if:
                 properties:
                   language:
@@ -64,10 +61,8 @@ spec:
                   framework:
                     enum: [Express]
                   version:
-                    enum: ['4.18', '4.20']
-                    default: '4.20'
-
-            # --- Rule 3: If Java is selected ---
+                    enum: ['18', '20']
+                    default: '20'
             - if:
                 properties:
                   language:
@@ -77,9 +72,8 @@ spec:
                   framework:
                     enum: [Spring Boot]
                   version:
-                    enum: ['3.2', '3.3']
-                    default: '3.3'
-
+                    enum: ['17', '21']
+                    default: '21'
 
     - title: Database Layer Configuration
       required:
@@ -92,9 +86,8 @@ spec:
           enum:
             - PostgreSQL
             - MySQL
-          description: Choose your target database engine.
 
-    - title: Repository Location
+    - title: Choose Repository Location
       required:
         - repoUrl
       properties:
@@ -105,15 +98,8 @@ spec:
           ui:options:
             allowedHosts:
               - github.com
-            # 👇 Triggers the frontend to fetch the user's GitHub identities dynamically
-            requestUserCredentials:
-              secretsKey: USER_OAUTH_TOKEN
-              additionalScopes:
-                github:
-                  - repo
-                  - read:org
 
-  # 2. BACKEND ACTIONS PIPELINE
+  # 2. ACTIONS PIPELINE
   steps:
     - id: fetch-base
       name: Fetch Base Template Skeleton
@@ -121,34 +107,28 @@ spec:
       input:
         url: ./skeleton
         values:
-          # 👇 Bridge the new multi-step nested object variables to the skeleton
+          # 👇 THIS CORRECTION CRITICALLY UNPACKS THE NESTED PROPERTIES FOR NUNJUCKS
           language: ${{ parameters.projectMeta.language }}
           framework: ${{ parameters.projectMeta.framework }}
-          
-          # Force both languageVersion and frameworkVersion to parse the same parameter safely
           languageVersion: ${{ parameters.projectMeta.version }}
           frameworkVersion: ${{ parameters.projectMeta.version }}
-          
           database: ${{ parameters.database }}
 
     - id: publish
       name: Publish to GitHub
       action: publish:github
       input:
-        # repoUrl: ${{ parameters.repoUrl.repoUrl }}
-        description: Generated via Backstage Software Templates.
         repoUrl: ${{ parameters.repoUrl if parameters.repoUrl.repoUrl is not defined else parameters.repoUrl.repoUrl }}
+        description: Generated via Backstage Software Templates.
 
     - id: register
       name: Register in Backstage Catalog
       action: catalog:register
       input:
-        # 👇 Change this from repoUrl to repoContentsUrl, 
-        # feeding in the automated output string from your publish step:
         repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
         catalogInfoPath: /catalog-info.yaml
 
-  # 3. FINAL SUMMARY OUTPUTS
+  # 3. INTERFACE LINKS
   output:
     links:
       - title: Repository
