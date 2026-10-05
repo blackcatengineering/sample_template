@@ -12,38 +12,74 @@ spec:
   parameters:
     - title: Webapp Configuration
       required:
-        - language
-        - languageVersion
-        - framework
-        - frameworkVersion
+        - projectMeta
       properties:
-        language:
-          title: Language
-          type: string
-          enum:
-            - JavaScript
-            - TypeScript
-            - Java
-        languageVersion:
-          title: Language Version
-          type: string
-          enum:
-            - '18'
-            - '20'
-            - '17'
-            - '21'
-        framework:
-          title: Framework
-          type: string
-          enum:
-            - Express
-            - Spring Boot
-        frameworkVersion:
-          title: Framework Version
-          type: string
-          enum:
-            - '4.18'
-            - '3.2'
+        projectMeta:
+          type: object
+          title: Webapp Specifications
+          required:
+            - language
+            - framework
+            - version
+          properties:
+            language:
+              title: Programming Language
+              type: string
+              enum:
+                - JavaScript
+                - TypeScript
+                - Java
+            framework:
+              title: Target Framework
+              type: string
+              enum:
+                - Express
+                - Spring Boot
+            version:
+              title: Framework Version
+              type: string
+
+          # ⛓️ DEPENDENCY MATRIX (Enforces valid combinations)
+          allOf:
+            # --- Rule 1: If JavaScript is selected ---
+            - if:
+                properties:
+                  language:
+                    enum: [JavaScript]
+              then:
+                properties:
+                  framework:
+                    enum: [Express]
+                  version:
+                    enum: ['4.18', '4.20']
+                    default: '4.20'
+
+            # --- Rule 2: If TypeScript is selected ---
+            - if:
+                properties:
+                  language:
+                    enum: [TypeScript]
+              then:
+                properties:
+                  framework:
+                    enum: [Express]
+                  version:
+                    enum: ['4.18', '4.20']
+                    default: '4.20'
+
+            # --- Rule 3: If Java is selected ---
+            - if:
+                properties:
+                  language:
+                    enum: [Java]
+              then:
+                properties:
+                  framework:
+                    enum: [Spring Boot]
+                  version:
+                    enum: ['3.2', '3.3']
+                    default: '3.3'
+
 
     - title: Database Layer Configuration
       required:
@@ -85,10 +121,10 @@ spec:
       input:
         url: ./skeleton
         values:
-          language: ${{ parameters.language }}
-          languageVersion: ${{ parameters.languageVersion }}
-          framework: ${{ parameters.framework }}
-          frameworkVersion: ${{ parameters.frameworkVersion }}
+          # 👇 Update these paths to match the new nested object structure
+          language: ${{ parameters.projectMeta.language }}
+          framework: ${{ parameters.projectMeta.framework }}
+          frameworkVersion: ${{ parameters.projectMeta.version }}
           database: ${{ parameters.database }}
 
     - id: publish
