@@ -1,89 +1,78 @@
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
-  name: sample-starter-template
-  title: Standard Application Starter Template
-  description: A clean starter framework for scaffolding repositories.
-  tags:
-    - starter
-    - template
+  name: github-publisher-example
+  title: Example GitHub Repository Publisher
+  description: An example Backstage Scaffolder template that uses RepoUrlPicker to publish a new repository to GitHub.
 spec:
-  owner: guest
-  type: template
+  owner: engineering-ops
+  type: service
 
+  # 1. Define the user input parameters
   parameters:
-    - title: Component Details
-      required:
-        - name
-        - owner
-      properties:
-        name:
-          title: Name
-          type: string
-          description: Name of your new repository code.
-        owner:
-          title: Owner
-          type: string
-          description: Owner of the component
-          ui:field: OwnerPicker
-          ui:options:
-            catalogFilter:
-              kind: [Group, User]
-    - title: Choose a Repository Owner
-      required:
-        - repoOwner
-      properties:
-        repoOwner:
-          title: Repository Owner
-          type: string
-          ui:field: RepoOwnerPicker
-          ui:options:
-            host: github.com
-            excludedOwners:
-              - backstage
-            requestUserCredentials:
-              secretsKey: USER_OAUTH_TOKEN
-    - title: Choose a Repository Location
-      required:
-        - repoUrl
+    - title: Repository Location
       properties:
         repoUrl:
           title: Repository Location
           type: string
           ui:field: RepoUrlPicker
           ui:options:
+            # Enforce or allow specific providers (e.g., github.com)
             allowedHosts:
               - github.com
-            allowedOwners:
-              - ${{value.repoOwner}}
-            allowedRepos:
-              - ${{value.name}}
+            # Optional: restrict to specific organizations if desired
+            # allowedOwners:
+            #   - my-github-org
 
+    - title: Template Details
+      required:
+        - component_id
+        - description
+      properties:
+        component_id:
+          title: Name
+          type: string
+          description: Unique name for the component and GitHub repository.
+        description:
+          title: Description
+          type: string
+          description: A brief description of the component.
+
+  # 2. Define the sequential execution steps
   steps:
+    # Fetch a skeleton template from a specific directory or remote URL
     - id: fetch-base
       name: Fetch Base Skeleton
       action: fetch:template
       input:
-        url: ./skeleton
+        url: ./skeleton # Assumes a local 'skeleton' directory exists next to this YAML
         values:
-          name: ${{ parameters.name }}
-          owner: ${{ parameters.owner }}
+          componentId: ${{ parameters.component_id }}
+          description: ${{ parameters.description }}
 
-    - id: publish
+    # Publish the rendered skeleton directly to GitHub using the RepoUrlPicker selection
+    - id: publish-github
       name: Publish to GitHub
       action: publish:github
       input:
-        description: This is ${{parameters.name}} bootstrapped via Backstage
-        repoUrl: '://github.com/${{parameters.name}}&owner=${{parameters.owner}}'
+        # Maps the complex RepoUrlPicker object directly to the URL string expected by the action
+        repoUrl: ${{ parameters.repoUrl }}
+        description: ${{ parameters.description }}
+        defaultBranch: main
 
+    # Optional: Register the component directly into the Backstage Catalog
     - id: register
-      name: Register in Software Catalog
+      name: Register in Backstage Catalog
       action: catalog:register
       input:
-        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
-        catalogInfoPath: '/catalog-info.yaml'
+        repoUrl: ${{ parameters.repoUrl }}
+        catalogInfoPath: /catalog-info.yaml
 
+  # 3. Define the outputs shown to the user upon successful completion
   output:
     links:
-      - title: Repository Link
-        url: ${{ steps['publish'].output.remoteUrl }}
+      - title: View Repository on GitHub
+        url: ${{ steps['publish-github'].output.remoteUrl }}
+      - title: Open in Backstage Catalog
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }}
