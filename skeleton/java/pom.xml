@@ -9,8 +9,8 @@
     <name>Generated Webapp</name>
 
     <properties>
-        <java.version>{{ values.languageVersion }}</java.version>
-        <spring-boot.version>{{ values.frameworkVersion }}</spring-boot.version>
+        <java.version>${{ values.languageVersion }}</java.version>
+        <spring-boot.version>${{ values.frameworkVersion }}</spring-boot.version>
     </properties>
 
     <dependencies>

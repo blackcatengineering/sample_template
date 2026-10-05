@@ -10,70 +10,59 @@ spec:
 
   # 1. FORM UI DEFINITION
   parameters:
-    - title: Webapp Configuration
+    - title: Choose Core Language
       required:
-        - projectMeta
+        - language
       properties:
-        projectMeta:
-          type: object
-          title: Webapp Specifications
-          required:
-            - language
-            - framework
-            - version
-          properties:
-            language:
-              title: Programming Language
-              type: string
-              enum:
-                - JavaScript
-                - TypeScript
-                - Java
-            framework:
-              title: Target Framework
-              type: string
-              enum:
-                - Express
-                - Spring Boot
-            version:
-              title: Framework/Language Version
-              type: string
+        language:
+          title: Primary Language
+          type: string
+          enum: [JavaScript, TypeScript, Java]
 
-          # ENFORCE VALID COMBINATIONS
-          allOf:
-            - if:
-                properties:
-                  language:
-                    enum: [JavaScript]
-              then:
-                properties:
-                  framework:
-                    enum: [Express]
-                  version:
-                    enum: ['18', '20']
-                    default: '20'
-            - if:
-                properties:
-                  language:
-                    enum: [TypeScript]
-              then:
-                properties:
-                  framework:
-                    enum: [Express]
-                  version:
-                    enum: ['18', '20']
-                    default: '20'
-            - if:
-                properties:
-                  language:
-                    enum: [Java]
-              then:
-                properties:
-                  framework:
-                    enum: [Spring Boot]
-                  version:
-                    enum: ['17', '21']
-                    default: '21'
+    - title: Spring Boot Configurations
+      # 💡 This dependencies block completely hides this whole page unless Java is picked
+      dependencies:
+        language:
+          oneOf:
+            - properties:
+                language:
+                  enum: [Java]
+      required:
+        - languageVersion
+        - frameworkVersion
+      properties:
+        languageVersion:
+          title: Java JDK Version
+          type: string
+          enum: ['17', '21']
+          default: '21'
+        frameworkVersion:
+          title: Spring Boot Version
+          type: string
+          enum: ['3.3', '3.4']
+          default: '3.4'
+
+    - title: Node.js Configurations
+      dependencies:
+        language:
+          oneOf:
+            - properties:
+                language:
+                  enum: [JavaScript, TypeScript]
+      required:
+        - languageVersion
+        - frameworkVersion
+      properties:
+        languageVersion:
+          title: Node.js Runtime Version
+          type: string
+          enum: ['18', '20', '22']
+          default: '22'
+        frameworkVersion:
+          title: Express Version
+          type: string
+          enum: ['4.21', '5.0']
+          default: '4.21'
 
     - title: Database Layer Configuration
       required:
@@ -101,18 +90,49 @@ spec:
 
   # 2. ACTIONS PIPELINE
   steps:
-    - id: fetch-base
-      name: Fetch Base Template Skeleton
+
+    # STEP A: Always fetch the shared/common platform manifests
+    - id: fetch-common
+      name: Fetch Common Baseline Manifests
       action: fetch:template
       input:
-        url: ./skeleton
+        url: ./skeleton/common
+        targetPath: .
         values:
-          # 👇 THIS CORRECTION CRITICALLY UNPACKS THE NESTED PROPERTIES FOR NUNJUCKS
-          language: ${{ parameters.projectMeta.language }}
-          framework: ${{ parameters.projectMeta.framework }}
-          languageVersion: ${{ parameters.projectMeta.version }}
-          frameworkVersion: ${{ parameters.projectMeta.version }}
-          database: ${{ parameters.database }}
+          name: ${{ values.name }}
+          owner: ${{ values.owner }}
+          namespace: ${{ values.namespace }}
+          database: ${{ values.database }}
+
+    # STEP B: Only fetch and parse Java files if Java was chosen
+    - id: fetch-java
+      name: Fetch Java Spring Boot Skeleton
+      if: ${{ values.language == 'Java' }}
+      action: fetch:template
+      input:
+        url: ./skeleton/java
+        targetPath: .
+        values:
+          name: ${{ values.name }}
+          language: ${{ values.language }}
+          languageVersion: ${{ values.languageVersion }}
+          frameworkVersion: ${{ values.frameworkVersion }}
+          database: ${{ values.database }}
+
+    # STEP C: Only fetch and parse Node files if JS/TS was chosen
+    - id: fetch-node
+      name: Fetch Node.js Express Skeleton
+      if: ${{ values.language == 'JavaScript' or values.language == 'TypeScript' }}
+      action: fetch:template
+      input:
+        url: ./skeleton/node
+        targetPath: .
+        values:
+          name: ${{ values.name }}
+          language: ${{ values.language }}
+          languageVersion: ${{ values.languageVersion }}
+          frameworkVersion: ${{ values.frameworkVersion }}
+          database: ${{ values.database }}
 
     - id: publish
       name: Publish to GitHub
