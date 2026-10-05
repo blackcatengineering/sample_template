@@ -9,8 +9,11 @@ spec:
   type: service
 
   # 1. FORM UI DEFINITION
-  parameters:
-    - title: Choose Core Language
+ parameters:
+    # ----------------------------------------------------
+    # STAGE 1: CORE SELECTION
+    # ----------------------------------------------------
+    - title: Step 1 - Choose Core Language
       required:
         - language
       properties:
@@ -19,8 +22,10 @@ spec:
           type: string
           enum: [JavaScript, TypeScript, Java]
 
-    - title: Spring Boot Configurations
-      # 💡 This dependencies block completely hides this whole page unless Java is picked
+    # ----------------------------------------------------
+    # STAGE 2: JAVA EXCLUSIVE SPECS
+    # ----------------------------------------------------
+    - title: Step 2 - Spring Boot Configurations
       dependencies:
         language:
           oneOf:
@@ -28,21 +33,24 @@ spec:
                 language:
                   enum: [Java]
       required:
-        - languageVersion
-        - frameworkVersion
+        - javaVersion
+        - springVersion
       properties:
-        languageVersion:
+        javaVersion: # ✨ Unique key name
           title: Java JDK Version
           type: string
           enum: ['17', '21']
           default: '21'
-        frameworkVersion:
+        springVersion: # ✨ Unique key name
           title: Spring Boot Version
           type: string
           enum: ['3.3', '3.4']
           default: '3.4'
 
-    - title: Node.js Configurations
+    # ----------------------------------------------------
+    # STAGE 3: NODE EXCLUSIVE SPECS
+    # ----------------------------------------------------
+    - title: Step 2 - Node.js Configurations
       dependencies:
         language:
           oneOf:
@@ -50,15 +58,15 @@ spec:
                 language:
                   enum: [JavaScript, TypeScript]
       required:
-        - languageVersion
-        - frameworkVersion
+        - nodeVersion
+        - expressVersion
       properties:
-        languageVersion:
+        nodeVersion: # ✨ Unique key name
           title: Node.js Runtime Version
           type: string
           enum: ['18', '20', '22']
           default: '22'
-        frameworkVersion:
+        expressVersion: # ✨ Unique key name
           title: Express Version
           type: string
           enum: ['4.21', '5.0']
