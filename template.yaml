@@ -10,68 +10,57 @@ spec:
 
   # 1. FORM UI DEFINITION
   parameters:
-    # ----------------------------------------------------
-    # STAGE 1: CORE SELECTION
-    # ----------------------------------------------------
-    - title: Step 1 - Choose Core Language
+    - title: Define Stack Specifications
       required:
         - language
       properties:
         language:
-          title: Primary Language
+          title: Primary Language Stack
           type: string
-          enum: [Node.js-Express, Java-SpringBoot]
-
-
-    # ----------------------------------------------------
-    # STAGE 2: JAVA EXCLUSIVE SPECS
-    # ----------------------------------------------------
-    - title: Step 2 - Spring Boot Configurations
+          enum: 
+            - 'Node.js-Express'
+            - 'Java-SpringBoot'
+      # 💡 Consolidating dynamic schema choices here prevents multi-page validation faults
       dependencies:
         language:
           oneOf:
+            # 🟢 Configurations revealed when 'Java-SpringBoot' is chosen
             - properties:
                 language:
-                  enum: [Java-SpringBoot]
-      required:
-        - javaVersion
-        - springVersion
-      properties:
-        javaVersion: # ✨ Unique key name
-          title: Java JDK Version
-          type: string
-          enum: ['17', '21']
-          default: '21'
-        springVersion: # ✨ Unique key name
-          title: Spring Boot Version
-          type: string
-          enum: ['3.3', '3.4']
-          default: '3.4'
-
-    # ----------------------------------------------------
-    # STAGE 3: NODE EXCLUSIVE SPECS
-    # ----------------------------------------------------
-    - title: Step 2 - Node.js Configurations
-      dependencies:
-        language:
-          oneOf:
+                  enum: ['Java-SpringBoot']
+              required:
+                - javaVersion
+                - springVersion
+              properties:
+                javaVersion:
+                  title: Java JDK Version
+                  type: string
+                  enum: ['17', '21']
+                  default: '21'
+                springVersion:
+                  title: Spring Boot Version
+                  type: string
+                  enum: ['3.3', '3.4']
+                  default: '3.4'
+            
+            # 🔵 Configurations revealed when 'Node.js-Express' is chosen
             - properties:
                 language:
-                  enum: [Node.js-Express]
-      required:
-        - nodeVersion
-        - expressVersion
-      properties:
-        nodeVersion: # ✨ Unique key name
-          title: Node.js Runtime Version
-          type: string
-          enum: ['18', '20', '22']
-          default: '22'
-        expressVersion: # ✨ Unique key name
-          title: Express Version
-          type: string
-          enum: ['4.21', '5.0']
-          default: '4.21'
+                  enum: ['Node.js-Express']
+              required:
+                - nodeVersion
+                - expressVersion
+              properties:
+                nodeVersion:
+                  title: Node.js Runtime Version
+                  type: string
+                  enum: ['18', '20', '22']
+                  default: '22'
+                expressVersion:
+                  title: Express Version
+                  type: string
+                  enum: ['4.21', '5.0']
+                  default: '4.21'
 
     - title: Database Layer Configuration
       required:
