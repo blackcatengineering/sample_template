@@ -130,7 +130,7 @@ spec:
     - id: fetch-java
       name: Fetch Java Spring Boot Skeleton
       # 💡 Explicitly ensures Java was picked AND Java variables are present
-      if: values.language == 'Java-SpringBoot'
+      if: ${{ values.language == 'Java-SpringBoot' }}
       action: fetch:template
       input:
         url: ./skeleton/java
@@ -146,7 +146,7 @@ spec:
     - id: fetch-node
       name: Fetch Node.js Express Skeleton
       # 💡 Explicitly ensures Node was picked AND Node variables are present
-      if: values.language == 'Node.js-Express'
+      if: ${{ values.language == 'Node.js-Express' }}
       action: fetch:template
       input:
         url: ./skeleton/node
