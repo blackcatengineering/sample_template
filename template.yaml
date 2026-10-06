@@ -99,7 +99,9 @@ spec:
           ui:options:
             allowedHosts:
               - github.com
-            # 👇 Triggers the frontend to fetch the user's GitHub identities dynamically
+            # 🚀 Dynamically pre-fills the repository box as an overridable default suggestion!
+            # It formats the app name to lowercase, swaps spaces for dashes, and filters out non-alphanumeric marks.
+            defaultRepoName: ${{ values.name | lower | replace(" ", "-") | replace(r/[^a-z0-9-_]/g, "") }}
             requestUserCredentials:
               secretsKey: USER_OAUTH_TOKEN
               additionalScopes:
@@ -128,7 +130,7 @@ spec:
     - id: fetch-java
       name: Fetch Java Spring Boot Skeleton
       # 💡 Explicitly ensures Java was picked AND Java variables are present
-      if: values.language == 'Java-SpringBoot' && values.javaVersion != null
+      if: values.language == 'Java-SpringBoot'
       action: fetch:template
       input:
         url: ./skeleton/java
@@ -144,7 +146,7 @@ spec:
     - id: fetch-node
       name: Fetch Node.js Express Skeleton
       # 💡 Explicitly ensures Node was picked AND Node variables are present
-      if: values.language == 'Node.js-Express' && values.nodeVersion != null
+      if: values.language == 'Node.js-Express'
       action: fetch:template
       input:
         url: ./skeleton/node
