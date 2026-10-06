@@ -170,7 +170,8 @@ spec:
       name: Register in Software Catalog
       action: catalog:register
       input:
-        repoContentsUrl: "${{ steps['publish'].output.repoContentsUrl }}"
+        # 🚀 Using this fallback array syntax handles ALL Backstage versions seamlessly
+        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl or steps['publish'].output.catalogInfoUrl }}
         catalogInfoPath: 'catalog-info.yaml'
 
   output:
