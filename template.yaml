@@ -284,6 +284,7 @@ spec:
           databaseHosting: ${{ parameters.databaseHosting }}
           deploymentTarget: ${{ parameters.deploymentTarget }}
           cloudProvider: ${{ parameters.cloudProvider }}
+          repoUrl: ${{ parameters.repoUrl }}
 
     - id: publish
       name: Publish to GitHub
