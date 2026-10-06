@@ -88,6 +88,7 @@ spec:
           enum: ['PostgreSQL', 'MySQL']
           default: 'PostgreSQL'
 
+
     - title: Repository Location
       required:
         - repoUrl
@@ -130,7 +131,7 @@ spec:
     - id: fetch-java
       name: Fetch Java Spring Boot Skeleton
       # 💡 Explicitly ensures Java was picked AND Java variables are present
-      if: ${{ values.language == 'Java-SpringBoot' }}
+      if: "${{ values.language == 'Java-SpringBoot' }}"
       action: fetch:template
       input:
         url: ./skeleton/java
@@ -146,7 +147,7 @@ spec:
     - id: fetch-node
       name: Fetch Node.js Express Skeleton
       # 💡 Explicitly ensures Node was picked AND Node variables are present
-      if: ${{ values.language == 'Node.js-Express' }}
+      if: "${{ values.language == 'Node.js-Express' }}"
       action: fetch:template
       input:
         url: ./skeleton/node
@@ -157,6 +158,32 @@ spec:
           languageVersion: "${{ values.nodeVersion }}"
           frameworkVersion: "${{ values.expressVersion }}"
           database: "${{ values.database }}"
+
+    # STEP D: Fetch PostgreSQL Terraform modules if selected
+    - id: fetch-terraform-postgres
+      name: Fetch PostgreSQL Infrastructure Definitions
+      if: "${{ values.database == 'PostgreSQL' }}"
+      action: fetch:template
+      input:
+        url: ./skeleton/terraform-postgres
+        targetPath: .
+        values:
+          name: "${{ values.name }}"
+          database: "${{ values.database }}"
+          namespace: "${{ values.namespace }}"
+
+    # STEP E: Fetch MySQL Terraform modules if selected
+    - id: fetch-terraform-mysql
+      name: Fetch MySQL Infrastructure Definitions
+      if: "${{ values.database == 'MySQL' }}"
+      action: fetch:template
+      input:
+        url: ./skeleton/terraform-mysql
+        targetPath: .
+        values:
+          name: "${{ values.name }}"
+          database: "${{ values.database }}"
+          namespace: "${{ values.namespace }}"
 
     # STEP D: Publish to GitHub
     - id: publish
