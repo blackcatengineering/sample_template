@@ -1,0 +1,17 @@
+[Unit]
+Description=${{ values.name }} API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=app
+Group=app
+WorkingDirectory=/opt/${{ values.name }}/api
+EnvironmentFile=-/etc/${{ values.name }}/api.env
+ExecStart=/opt/${{ values.name }}/api/start.sh
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

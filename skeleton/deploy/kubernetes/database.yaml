@@ -1,0 +1,13 @@
+# Database: ${{ values.databaseTechnology | default('none') }}
+# Hosting: ${{ values.databaseHosting | default('none') }}
+#
+# Prefer a managed database where appropriate. This resource records the
+# selected architecture but deliberately does not provision a database.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ${{ values.name }}-database-info
+  namespace: ${{ values.name }}
+data:
+  DATABASE_TYPE: "${{ values.databaseTechnology | default('none') }}"
+  DATABASE_HOSTING: "${{ values.databaseHosting | default('none') }}"

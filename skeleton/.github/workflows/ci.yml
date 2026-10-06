@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate generated structure
+        run: |
+          test -f catalog-info.yaml
+          test -f README.md
+          test -d deploy
+          echo "Deployment: ${{ values.deploymentTarget }}"
+          echo "Cloud: ${{ values.cloudProvider }}"
+          echo "Web: ${{ values.webEnabled }}"
+          echo "API: ${{ values.apiEnabled }}"
+          echo "Database: ${{ values.databaseEnabled }}"

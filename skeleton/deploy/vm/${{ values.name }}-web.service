@@ -1,0 +1,17 @@
+[Unit]
+Description=${{ values.name }} web tier
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=app
+Group=app
+WorkingDirectory=/opt/${{ values.name }}/web
+EnvironmentFile=-/etc/${{ values.name }}/web.env
+ExecStart=/opt/${{ values.name }}/web/start.sh
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
