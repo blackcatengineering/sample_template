@@ -1,209 +1,304 @@
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
+
 metadata:
-  name: sample-starter-template-v2
-  title: Standard Application Starter Template
-  description: A clean starter framework for scaffolding repositories.
+  name: cloud-three-tier-service
+  title: Cloud Three-Tier Service
+  description: Create a service by selecting its web, API, data, and deployment architecture.
   tags:
-    - starter
-    - template
+    - cloud
+    - kubernetes
+    - vm
+    - three-tier
+    - service
+
 spec:
-  owner: guest
-  type: template
+  owner: group:platform-engineering
+  type: service
 
-  # ----------------------------------------------------
-  # 1. PARAMETERS WIZARD INTERFACE
-  # ----------------------------------------------------
   parameters:
-    - title: Step 1 - Define Stack Specifications
-      required:
-        - language
-      properties:
-        language:
-          title: Primary Language Stack
-          type: string
-          enum: 
-            - 'Node.js-Express'
-            - 'Java-SpringBoot'
-      dependencies:
-        language:
-          oneOf:
-            # 🟢 JAVA ACTIVE CONDITIONAL BLOCK
-            - properties:
-                language:
-                  enum: ['Java-SpringBoot']
-                javaVersion:
-                  title: Java JDK Version
-                  type: string
-                  enum: ['17', '21']
-                  default: '21'
-                springVersion:
-                  title: Spring Boot Version
-                  type: string
-                  enum: ['3.3', '3.4']
-                  default: '3.4'
-              required:
-                - javaVersion
-                - springVersion
-            
-            # 🔵 NODE ACTIVE CONDITIONAL BLOCK
-            - properties:
-                language:
-                  enum: ['Node.js-Express']
-                nodeVersion:
-                  title: Node.js Runtime Version
-                  type: string
-                  enum: ['18', '20', '22']
-                  default: '22'
-                expressVersion:
-                  title: Express Version
-                  type: string
-                  enum: ['4.21', '5.0']
-                  default: '4.21'
-              required:
-                - nodeVersion
-                - expressVersion
-
-    - title: Step 2 - Deployment Target Destination
+    - title: Application
+      description: Basic identity and ownership for the new service.
       required:
         - name
         - owner
-        - namespace
-        - database
+        - description
       properties:
         name:
-          title: Application Name
+          title: Service name
           type: string
+          description: Lowercase name used for the component and repository.
+          pattern: '^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$'
+          ui:autofocus: true
         owner:
-          title: Owner Group
+          title: Owner
           type: string
-          default: engineering-team
-        namespace:
-          title: Kubernetes Namespace
+          description: Team responsible for the service.
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: Group
+        description:
+          title: Description
           type: string
-          default: default
-        database:
-          title: Backend Database Engine
+          minLength: 10
+          maxLength: 200
+        visibility:
+          title: Repository visibility
           type: string
-          enum: ['PostgreSQL', 'MySQL']
-          default: 'PostgreSQL'
+          default: private
+          enum:
+            - private
+            - public
+          enumNames:
+            - Private
+            - Public
 
+    - title: Web / presentation tier
+      description: Choose whether the service needs a user-facing web tier.
+      required:
+        - webEnabled
+      properties:
+        webEnabled:
+          title: Do you want a visual web tier?
+          type: boolean
+          default: true
+          ui:widget: radio
+      dependencies:
+        webEnabled:
+          oneOf:
+            - properties:
+                webEnabled:
+                  const: false
+            - properties:
+                webEnabled:
+                  const: true
+                webTechnology:
+                  title: Web technology
+                  type: string
+                  default: react
+                  enum:
+                    - react
+                    - angular
+                    - vue
+                    - django
+                    - static
+                    - other
+                  enumNames:
+                    - React
+                    - Angular
+                    - Vue
+                    - Django
+                    - Static HTML
+                    - Other
+                webContainer:
+                  title: Web container
+                  type: string
+                  default: nginx
+                  enum:
+                    - nginx
+                    - caddy
+                    - node
+                    - apache
+                  enumNames:
+                    - nginx
+                    - Caddy
+                    - Node.js
+                    - Apache
+              required:
+                - webTechnology
+                - webContainer
 
-    - title: Repository Location
+    - title: Application / API tier
+      description: Choose whether the service needs application or API processing.
+      required:
+        - apiEnabled
+      properties:
+        apiEnabled:
+          title: Do you want an application/API tier?
+          type: boolean
+          default: true
+          ui:widget: radio
+      dependencies:
+        apiEnabled:
+          oneOf:
+            - properties:
+                apiEnabled:
+                  const: false
+            - properties:
+                apiEnabled:
+                  const: true
+                apiTechnology:
+                  title: Application/API technology
+                  type: string
+                  default: python-fastapi
+                  enum:
+                    - node-express
+                    - node-fastify
+                    - python-fastapi
+                    - python-falcon
+                    - java-springboot
+                    - dotnet-aspnet
+                    - go
+                    - other
+                  enumNames:
+                    - Node.js / Express
+                    - Node.js / Fastify
+                    - Python / FastAPI
+                    - Python / Falcon
+                    - Java / Spring Boot
+                    - .NET / ASP.NET Core
+                    - Go
+                    - Other
+              required:
+                - apiTechnology
+
+    - title: Data tier
+      description: Choose whether the service requires persistent data.
+      required:
+        - databaseEnabled
+      properties:
+        databaseEnabled:
+          title: Do you want a database?
+          type: boolean
+          default: true
+          ui:widget: radio
+      dependencies:
+        databaseEnabled:
+          oneOf:
+            - properties:
+                databaseEnabled:
+                  const: false
+            - properties:
+                databaseEnabled:
+                  const: true
+                databaseTechnology:
+                  title: Database technology
+                  type: string
+                  default: postgresql
+                  enum:
+                    - postgresql
+                    - mysql
+                    - mariadb
+                    - oracle
+                    - sqlserver
+                    - mongodb
+                    - cassandra
+                    - other
+                  enumNames:
+                    - PostgreSQL
+                    - MySQL
+                    - MariaDB
+                    - Oracle
+                    - Microsoft SQL Server
+                    - MongoDB
+                    - Cassandra
+                    - Other
+                databaseHosting:
+                  title: Database hosting
+                  type: string
+                  default: managed
+                  enum:
+                    - managed
+                    - kubernetes
+                    - vm
+                    - external
+                  enumNames:
+                    - Managed cloud service
+                    - Kubernetes
+                    - Virtual machine
+                    - External service
+              required:
+                - databaseTechnology
+                - databaseHosting
+
+    - title: Deployment
+      description: Select the primary runtime platform.
+      required:
+        - deploymentTarget
+        - cloudProvider
+      properties:
+        deploymentTarget:
+          title: Deployment target
+          type: string
+          default: kubernetes
+          enum:
+            - kubernetes
+            - vm
+          enumNames:
+            - Kubernetes
+            - Virtual machines
+        cloudProvider:
+          title: Cloud provider
+          type: string
+          default: aws
+          enum:
+            - aws
+            - azure
+            - gcp
+            - other
+          enumNames:
+            - AWS
+            - Azure
+            - Google Cloud
+            - Other
+
+    - title: Repository
+      description: Where Backstage should publish the generated service.
       required:
         - repoUrl
       properties:
         repoUrl:
-          title: Repository Destination
+          title: Repository location
           type: string
+          description: GitHub repository where the generated service will be published.
           ui:field: RepoUrlPicker
           ui:options:
             allowedHosts:
               - github.com
-            # 🚀 Dynamically pre-fills the repository box as an overridable default suggestion!
-            # It formats the app name to lowercase, swaps spaces for dashes, and filters out non-alphanumeric marks.
-            defaultRepoName: ${{ values.name | lower | replace(" ", "-") | replace(r/[^a-z0-9-_]/g, "") }}
-            requestUserCredentials:
-              secretsKey: USER_OAUTH_TOKEN
-              additionalScopes:
-                github:
-                  - repo
-                  - read:org
 
-  # ----------------------------------------------------
-  # 2. ACTIONS PIPELINE
-  # ----------------------------------------------------
   steps:
-    # STEP A: Always pull the common base files
-    - id: fetch-common
-      name: Fetch Common Baseline Manifests
+    - id: fetchSkeleton
+      name: Generate service
       action: fetch:template
       input:
-        url: ./skeleton/common
-        targetPath: .
+        url: ./skeleton
         values:
-          name: "${{ values.name }}"
-          owner: "${{ values.owner }}"
-          namespace: "${{ values.namespace }}"
-          database: "${{ values.database }}"
+          name: ${{ parameters.name }}
+          owner: ${{ parameters.owner }}
+          description: ${{ parameters.description }}
+          visibility: ${{ parameters.visibility }}
+          webEnabled: ${{ parameters.webEnabled }}
+          webTechnology: ${{ parameters.webTechnology }}
+          webContainer: ${{ parameters.webContainer }}
+          apiEnabled: ${{ parameters.apiEnabled }}
+          apiTechnology: ${{ parameters.apiTechnology }}
+          databaseEnabled: ${{ parameters.databaseEnabled }}
+          databaseTechnology: ${{ parameters.databaseTechnology }}
+          databaseHosting: ${{ parameters.databaseHosting }}
+          deploymentTarget: ${{ parameters.deploymentTarget }}
+          cloudProvider: ${{ parameters.cloudProvider }}
 
-    # STEP B: Fetch Java only if selected AND variables are active
-    - id: fetch-java
-      name: Fetch Java Spring Boot Skeleton
-      # 💡 Explicitly ensures Java was picked AND Java variables are present
-      if: "${{ values.language == 'Java-SpringBoot' }}"
-      action: fetch:template
-      input:
-        url: ./skeleton/java
-        targetPath: .
-        values:
-          name: "${{ values.name }}"
-          language: "${{ values.language }}"
-          languageVersion: "${{ values.javaVersion }}"
-          frameworkVersion: "${{ values.springVersion }}"
-          database: "${{ values.database }}"
-
-    # STEP C: Fetch Node only if selected AND variables are active
-    - id: fetch-node
-      name: Fetch Node.js Express Skeleton
-      # 💡 Explicitly ensures Node was picked AND Node variables are present
-      if: "${{ values.language == 'Node.js-Express' }}"
-      action: fetch:template
-      input:
-        url: ./skeleton/node
-        targetPath: .
-        values:
-          name: "${{ values.name }}"
-          language: "${{ values.language }}"
-          languageVersion: "${{ values.nodeVersion }}"
-          frameworkVersion: "${{ values.expressVersion }}"
-          database: "${{ values.database }}"
-
-    # STEP D: Fetch PostgreSQL Terraform modules if selected
-    - id: fetch-terraform-postgres
-      name: Fetch PostgreSQL Infrastructure Definitions
-      if: "${{ values.database == 'PostgreSQL' }}"
-      action: fetch:template
-      input:
-        url: ./skeleton/terraform-postgres
-        targetPath: .
-        values:
-          name: "${{ values.name }}"
-          database: "${{ values.database }}"
-          namespace: "${{ values.namespace }}"
-
-    # STEP E: Fetch MySQL Terraform modules if selected
-    - id: fetch-terraform-mysql
-      name: Fetch MySQL Infrastructure Definitions
-      if: "${{ values.database == 'MySQL' }}"
-      action: fetch:template
-      input:
-        url: ./skeleton/terraform-mysql
-        targetPath: .
-        values:
-          name: "${{ values.name }}"
-          database: "${{ values.database }}"
-          namespace: "${{ values.namespace }}"
-
-    # STEP D: Publish to GitHub
     - id: publish
       name: Publish to GitHub
       action: publish:github
       input:
-        # 🚀 Pass the RepoUrlPicker output object directly!
         repoUrl: ${{ parameters.repoUrl }}
-        description: Generated via Backstage Software Templates.
+        description: ${{ parameters.description }}
+        repoVisibility: ${{ parameters.visibility }}
+        defaultBranch: main
 
-    # STEP E: Catalog Registration
     - id: register
-      name: Register in Software Catalog
+      name: Register in the catalog
       action: catalog:register
       input:
-        # 🚀 Using this fallback array syntax handles ALL Backstage versions seamlessly
-        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl or steps['publish'].output.catalogInfoUrl }}
-        catalogInfoPath: 'catalog-info.yaml'
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+        catalogInfoPath: /catalog-info.yaml
 
   output:
     links:
-      - title: Repository Link
-        url: "${{ steps['publish'].output.remoteUrl }}"
+      - title: Repository
+        url: ${{ steps.publish.output.remoteUrl }}
+      - title: Catalog
+        icon: catalog
+        entityRef: ${{ steps.register.output.entityRef }}
