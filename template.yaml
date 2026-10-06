@@ -256,6 +256,12 @@ spec:
           ui:options:
             allowedHosts:
               - github.com
+            requestUserCredentials:
+              secretsKey: USER_OAUTH_TOKEN
+              additionalScopes:
+                github:
+                  - repo
+                  - read:org
 
   steps:
     - id: fetchSkeleton
