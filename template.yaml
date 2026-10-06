@@ -158,11 +158,12 @@ spec:
 
     # STEP D: Publish to GitHub
     - id: publish
-      name: Publish to Git Repository
+      name: Publish to GitHub
       action: publish:github
       input:
-        description: "This is ${{ values.name }} bootstrapped via Backstage"
-        repoUrl: "://github.com{{ values.name }}&owner=${{ values.owner }}"
+        # 🚀 Pass the RepoUrlPicker output object directly!
+        repoUrl: ${{ parameters.repoUrl }}
+        description: Generated via Backstage Software Templates.
 
     # STEP E: Catalog Registration
     - id: register
