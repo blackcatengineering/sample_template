@@ -107,7 +107,7 @@ spec:
                   - repo
                   - read:org
 
-# ----------------------------------------------------
+  # ----------------------------------------------------
   # 2. ACTIONS PIPELINE
   # ----------------------------------------------------
   steps:
@@ -156,12 +156,26 @@ spec:
           frameworkVersion: "${{ values.expressVersion }}"
           database: "${{ values.database }}"
 
+    # STEP D: Publish to GitHub
     - id: publish
-      name: Publish to GitHub
+      name: Publish to Git Repository
       action: publish:github
       input:
-        repoUrl: ${{ parameters.repoUrl }}
-        description: Generated via Backstage Software Templates.
+        description: "This is ${{ values.name }} bootstrapped via Backstage"
+        repoUrl: "://github.com{{ values.name }}&owner=${{ values.owner }}"
+
+    # STEP E: Catalog Registration
+    - id: register
+      name: Register in Software Catalog
+      action: catalog:register
+      input:
+        repoContentsUrl: "${{ steps['publish'].output.repoContentsUrl }}"
+        catalogInfoPath: 'catalog-info.yaml'
+
+  output:
+    links:
+      - title: Repository Link
+        url: "${{ steps['publish'].output.remoteUrl }}"
 
 
     - id: register
