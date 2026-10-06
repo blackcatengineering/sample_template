@@ -1,12 +1,10 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  # Using the dump filter handles names safely even if special characters leak in
-  name: {{ values.name | dump }}
+  # This MUST use the dynamic values name to avoid 409 database locks
+  name: {{ values.name }}-{{values.language | lower | replace " " "-" }}
   description: "Scaffolded application using the {{ values.language }} stack"
-  annotations:
-    backstage.io/techdocs-ref: dir:.
 spec:
   type: service
   lifecycle: experimental
-  owner: {{ values.owner | default("engineering-team") | dump }}
+  owner: {{ values.owner }}
